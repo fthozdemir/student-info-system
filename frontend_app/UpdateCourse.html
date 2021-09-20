@@ -1,0 +1,76 @@
+<html>
+<head>
+	<title>Update Course</title>
+</head>
+<body onload="">
+	<table id="myTable" style="width:50%;"> 	
+        <tr> 
+            <td>Name: </td>
+            <td><input id="name" type="text"/></td> 
+        </tr>
+		<tr><tr><tr><tr><tr><tr><tr>
+		<tr>
+			<td align="right"><button onclick="updateCourse()">Update</button></td>
+			<td align="left"><button onclick="back()">Back</button></td>
+		</tr>
+    </table> 
+</body>
+<script>
+var userid = localStorage.getItem("userid");
+var passw = localStorage.getItem("password");
+var id;
+window.onload = function(){
+	const urlParams = new URLSearchParams(window.location.search);
+	id = urlParams.get('id');
+	
+	return fetch(
+            'http://localhost:8080/course/getbyid/'+id,
+            {   method: 'GET',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw)}
+                ),
+             }
+           ).then((response) => { 
+			if(response.status == 200){
+						return response.json();
+					}else{
+						alert("You are not logged in");
+						window.location.replace("./login.html");
+			}
+			})
+			.then(function(data) {
+				console.log(data);
+				document.getElementById("name").value = data.name;
+			})
+            .catch(err => console.log(err))
+}
+
+function back(){
+	window.location.replace("./CourseList.html");
+}
+function updateCourse() {
+	var name = document.getElementById("name").value;
+	
+	return fetch(
+            'http://localhost:8080/course/update/',
+            {   method: 'POST',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw),
+				    "Content-Type": "application/json"}
+                ),
+				body: JSON.stringify(
+                   {'courseId': id,'name': name}
+                )
+             }
+           ).then( (response) => { return response;})
+			.then(function(data) {
+				if(data.status == 200){
+					window.location.replace("./CourseList.html");
+				}else{
+					alert("Invalid request");
+				}
+			})
+            .catch(err => console.log(err))
+}
+</script>
+</html>

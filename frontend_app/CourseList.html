@@ -1,0 +1,109 @@
+<html>
+<head>
+	<title>Course List</title>
+</head>
+<center>
+<body onload="getAllCourses()">
+	<table id="myTable" style="width:50%; text-align:center; margin-top:30px;" align="center" cellpadding="10px" border>
+	<h2><u>Course List</u></h2>
+	<thead>
+        <tr>
+			<th>Course Id</th>
+            <th>Name</th> 
+			<th>Registered Course</th>
+			<th>Operations</th>
+        </tr>
+	</thead>
+	<tbody id="tBody">
+
+	</tbody>
+    </table> 
+	<br><br>
+<button onclick="callAddCourse()">Add Course</button>
+<button onclick="back()">Home</button>
+<button onclick="logout()">Logout</button>
+</center>
+</body>
+<script>
+var userid = localStorage.getItem("userid");
+var passw = localStorage.getItem("password");
+
+function back(){
+	window.location.replace("./AdminHome.html");
+}
+
+function callUpdateCoursePage(id){
+	window.location.replace("./UpdateCourse.html?id="+id);
+}
+
+function deleteCourse(id){
+	var r = confirm("Are you sure you want to delete course wiht id: "+ id);
+	if (r == true) {		
+		return fetch(
+            'http://localhost:8080/course/delete/'+id,
+            {   method: 'GET',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw)}
+                ),
+             }
+           ).then( (response) => { return response;})
+			.then(function(data) {
+				if(data.status == 200){
+					window.location.reload();
+				}else{
+					alert("Invalid request");
+				}
+			})
+            .catch(err => console.log(err))		
+	} else {
+
+	}
+}
+
+function callAddCourse(){	
+	window.location.replace("./AddCourse.html");
+}
+
+function logout(){
+	localStorage.clear();
+	window.location.replace("./login.html");
+}
+
+function getAllCourses() {
+	return fetch(
+            'http://localhost:8080/course/getall/',
+            {   method: 'GET',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw),
+				    "Content-Type": "application/json",
+                    "Accept":"application/json"}
+                ),
+             }
+           ).then( (response) => { 
+					if(response.status == 200){
+						return response.json();
+					}else{
+						alert("You are not logged in");
+						window.location.replace("./login.html");
+					}
+			})
+			.then(function(data) {
+				var table = document.getElementById("myTable").getElementsByTagName('tbody')[0];				
+				for(var i=0;i<data.length;i++){
+					var row = table.insertRow(i);
+					var cell1 = row.insertCell(0);
+					var cell2 = row.insertCell(1);
+					var cell3 = row.insertCell(2);
+					var cellLast = row.insertCell(3);
+					cell1.innerHTML = data[i].courseId;
+					cell2.innerHTML = data[i].name;
+					cell3.innerHTML = data[i].studentIdsStr;
+					cellLast.innerHTML = "<button onclick='callUpdateCoursePage(" + data[i].courseId + ")'>Update</button>" + " " + 
+					"<button onclick='deleteCourse(" + data[i].courseId + ")'>Delete</button>";
+				}
+				
+			})
+            .catch(err => console.log(err))
+}
+</script>
+</html>

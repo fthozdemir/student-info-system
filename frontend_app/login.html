@@ -1,0 +1,63 @@
+<html>
+<head>
+	<title>Admin Login</title>
+</head>
+<body onload="">
+	<center>
+		<h1>F.O.V.D.K</h1>
+		<h3><u>Student Information System</u></h3>
+	</center>
+	<table id="myTable" style="width:30%; text-align:center; margin-top:70px;" align="center" cellpadding="10px"> 	
+        <tr> 
+            <td style="text-align:right">User Id: </td>
+            <td><input id="userid" type="text"/></td> 
+        </tr>
+		<tr> 
+            <td style="text-align:right">Password: </td>
+            <td><input id="passw" type="password"/></td> 
+        </tr>
+		<tr><tr><tr><tr><tr><tr><tr>
+		<tr>
+			<td></td>
+			<td><button onclick="myFunction()">Login</button></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td><a href="./StudentLogin.html">Student Login</a></td>
+		</tr>
+    </table> 
+</body>
+<script>
+function myFunction() {
+ 	var userid = document.getElementById("userid").value;
+	var passw = document.getElementById("passw").value;
+	if(userid == "" || passw == ""){	
+		alert("Invalid credentials");
+	}
+	
+	return fetch(
+            'http://localhost:8080/login',
+            {   method: 'GET',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw)}
+                ),
+             }
+           ).then( (response) => { return response;})
+			.then(function(data) {
+				console.log(data.response);
+				if(data.status == 200){
+					localStorage.setItem('userid', userid);
+					localStorage.setItem('password', passw);
+					window.location.replace("./AdminHome.html");
+				}else{
+					alert("Invalid username or password");
+				}
+			})
+            .catch(err => 
+			{
+				console.log(err);
+			}
+			)
+}
+</script>
+</html>

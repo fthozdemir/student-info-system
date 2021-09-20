@@ -1,0 +1,185 @@
+<html>
+<head>
+	<title>Student Course List</title>
+</head>
+<body onload="">
+<center>
+	<table id="myTable" style="width:30%; text-align:center; margin-top:30px;" align="center" cellpadding="10px" border>
+	<h2><u>Registered Course List</u> - </h2>
+	<thead>
+        <tr>
+			<th>Course Id</th>
+            <th>Name</th> 
+			<th>Operations</th> 
+        </tr>
+	</thead>
+	<tbody id="tBody">
+
+	</tbody>
+    </table> 
+	
+ <div style="margin-top:40px">
+	<label for="cid">Course Id:</label>
+	<input type="text" length="2" size="2" id="cid">
+	<button onclick="addCourse()">Add Course</button> <br><br>
+	
+	<table id="myTable1" style="width:50%; text-align:center" border> 
+	<h2><u>Course List</u> - </h2>
+	<thead>
+        <tr>
+			<th>Course Id</th>
+            <th>Name</th> 
+        </tr>
+	</thead>
+	<tbody id="tBody">
+
+	</tbody>
+    </table> 
+	<br><br>
+	<button onclick="back()">Home</button>
+	<button onclick="logout()">Logout</button>
+ </div>
+</center>
+</body>
+<script>
+var userid = localStorage.getItem("userid");
+var passw = localStorage.getItem("password");
+var student = JSON.parse(localStorage.getItem('user'));
+
+window.onload=function(){
+getAllRegCourses();
+getAllCourses();
+}
+
+function addCourse(){
+	var courseId = document.getElementById("cid").value;
+	return fetch(
+            'http://localhost:8080/studentmgmt/addcourse/'+student.studentId,
+            {   method: 'POST',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw),
+				    "Content-Type": "application/json"}
+                ),
+				body: JSON.stringify(
+                   {'courseId': courseId,'name': name}
+                )
+             }
+           ).then( (response) => { return response;})
+			.then(function(data) {
+				console.log(data.response);
+				if(data.status == 200){
+					window.location.reload();
+				}else{
+					alert("Invalid request");
+				}
+			})
+            .catch(err => console.log(err))
+}
+
+function back(){
+	window.location.replace("./StudentHome.html");
+}
+
+function removeCourse(id){
+	var r = confirm("Are you sure you want to delete course wiht id: "+ id);
+	if (r == true) {		
+		return fetch(
+            'http://localhost:8080/studentmgmt/removecourse/'+student.studentId,
+            {   method: 'POST',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw),
+				    "Content-Type": "application/json"}
+                ),
+				body: JSON.stringify(
+                   {'courseId': id,'name': name}
+                )
+             }
+           ).then( (response) => { return response;})
+			.then(function(data) {
+				if(data.status == 200){
+					window.location.reload();
+				}else{
+					alert("Invalid request");
+				}
+			})
+            .catch(err => console.log(err))		
+	} else {
+
+	}
+}
+
+function logout(){
+	localStorage.clear();
+	window.location.replace("./StudentLogin.html");
+}
+function getAllRegCourses() {
+	return fetch(
+            'http://localhost:8080/studentmgmt/registeredcourse/'+student.studentId,
+            {   method: 'GET',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw),
+				    "Content-Type": "application/json",
+                    "Accept":"application/json"}
+                ),
+             }
+           ).then( (response) => { 
+					if(response.status == 200){
+						return response.json();
+					}else{
+						alert("You are not logged in");
+						window.location.replace("./StudentLogin.html");
+					}
+			})
+			.then(function(data) {
+				console.log(data);
+				
+				var table = document.getElementById("myTable").getElementsByTagName('tbody')[0];				
+				for(var i=0;i<data.length;i++){
+					var row = table.insertRow(i);
+					var cell1 = row.insertCell(0);
+					var cell2 = row.insertCell(1);
+					var cellLast = row.insertCell(2);
+					cell1.innerHTML = data[i].courseId;
+					cell2.innerHTML = data[i].name;
+					cellLast.innerHTML = "<button onclick='removeCourse(" + data[i].courseId + ")'>Drop</button>";
+				}
+				
+			})
+            .catch(err => console.log(err))
+}
+
+function getAllCourses() {
+	return fetch(
+            'http://localhost:8080/studentmgmt/getallCourses/',
+            {   method: 'GET',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw),
+				    "Content-Type": "application/json",
+                    "Accept":"application/json"}
+                ),
+             }
+           ).then( (response) => { 
+					if(response.status == 200){
+						return response.json();
+					}else{
+						alert("You are not logged in");
+						//window.location.replace("./login.html");
+					}
+			})
+			.then(function(data) {
+				console.log(data);
+				
+				var table = document.getElementById("myTable1").getElementsByTagName('tbody')[0];				
+				for(var i=0;i<data.length;i++){
+					var row = table.insertRow(i);
+					var cell1 = row.insertCell(0);
+					var cell2 = row.insertCell(1);
+					cell1.innerHTML = data[i].courseId;
+					cell2.innerHTML = data[i].name;
+				}
+				
+			})
+            .catch(err => console.log(err))
+}
+</script>
+</html>

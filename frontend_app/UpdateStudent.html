@@ -1,0 +1,95 @@
+<html>
+<head>
+	<title>Update Student</title>
+</head>
+<body onload="">
+	<table id="myTable" style="width:50%;"> 	
+        <tr> 
+            <td>Name: </td>
+            <td><input id="name" type="text"/></td> 
+        </tr>
+		<tr> 
+            <td>Surname: </td>
+            <td><input id="sname" type="text"/></td> 
+        </tr>
+		<tr> 
+            <td>User Id: </td>
+            <td><input id="userid" type="text"/></td> 
+        </tr>
+		<tr> 
+            <td>Password: </td>
+            <td><input id="passw" type="password"/></td> 
+        </tr>
+		<tr><tr><tr><tr><tr><tr><tr>
+		<tr>
+			<td align="right"><button onclick="updateStudent()">Update</button></td>
+			<td align="left"><button onclick="back()">Back</button></td>
+		</tr>
+    </table> 
+</body>
+<script>
+var userid = localStorage.getItem("userid");
+var passw = localStorage.getItem("password");
+var id;
+window.onload = function(){
+	const urlParams = new URLSearchParams(window.location.search);
+	id = urlParams.get('id');
+	
+	return fetch(
+            'http://localhost:8080/student/getbyid/'+id,
+            {   method: 'GET',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw)}
+                ),
+             }
+           ).then((response) => { 
+			if(response.status == 200){
+						return response.json();
+					}else{
+						alert("You are not logged in");
+						window.location.replace("./login.html");
+			}
+			})
+			.then(function(data) {
+				document.getElementById("userid").value = data.userid;
+				document.getElementById("passw").value = data.password;
+				document.getElementById("name").value = data.name;
+				document.getElementById("sname").value = data.surname;
+			})
+            .catch(err => console.log(err))
+}
+
+function back(){
+	window.location.replace("./StudentList.html");
+}
+
+function updateStudent() {
+ 	var useridToUpdate = document.getElementById("userid").value;
+	var passwordToUpdate = document.getElementById("passw").value;
+	var name = document.getElementById("name").value;
+	var surname = document.getElementById("sname").value;
+	
+	return fetch(
+            'http://localhost:8080/student/update/',
+            {   method: 'POST',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw),
+				    "Content-Type": "application/json"}
+                ),
+				body: JSON.stringify(
+                   {'studentId': id,'name': name, 'surname': surname, 'password': "", 'userid' : useridToUpdate}
+                )
+             }
+           ).then( (response) => { return response;})
+			.then(function(data) {
+				console.log(data.response);
+				if(data.status == 200){
+					window.location.replace("./StudentList.html");
+				}else{
+					alert("Invalid request");
+				}
+			})
+            .catch(err => console.log(err))
+}
+</script>
+</html>

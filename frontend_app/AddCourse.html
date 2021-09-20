@@ -1,0 +1,51 @@
+<html>
+<head>
+	<title>Add Course</title>
+</head>
+<body onload="">
+	<table id="myTable" style="width:50%;"> 	
+        <tr> 
+            <td>Name: </td>
+            <td><input id="name" type="text"/></td> 
+        </tr>
+		<tr><tr><tr><tr><tr><tr><tr>
+		<tr>
+			<td align="right"><button onclick="addCourse()">Add</button></td>
+			<td align="left"><button onclick="back()">Back</button></td>
+		</tr>
+    </table> 
+</body>
+<script>
+function back(){
+	window.location.replace("./CourseList.html");
+}
+function addCourse() {
+	var name = document.getElementById("name").value;
+	if(name === ''){
+		alert('Please enter all the inputs!')
+		return;
+	}
+	
+	return fetch(
+            'http://localhost:8080/course/add/',
+            {   method: 'POST',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(localStorage.getItem("userid") + ":" + localStorage.getItem("password")),
+				    "Content-Type": "application/json"}
+                ),
+				body: JSON.stringify(
+                   {'name': name}
+                )
+             }
+           ).then( (response) => { return response;})
+			.then(function(data) {
+				if(data.status == 200){
+					window.location.replace("./CourseList.html");
+				}else{
+					alert("Invalid request");
+				}
+			})
+            .catch(err => console.log(err))
+}
+</script>
+</html>

@@ -1,0 +1,68 @@
+<html>
+<head>
+	<title>Student Login</title>
+</head>
+<body onload="">
+	<center>
+		<h1>F.O.V.D.K</h1>
+		<h3><u>Student Information System</u></h3>
+	</center>
+	<table id="myTable" style="width:30%; text-align:center; margin-top:70px;" align="center" cellpadding="10px"> 	
+        <tr> 
+            <td style="text-align:right">User Id: </td>
+            <td><input id="userid" type="text"/></td> 
+        </tr>
+		<tr> 
+            <td style="text-align:right">Password: </td>
+            <td><input id="passw" type="password"/></td> 
+        </tr>
+		<tr><tr><tr><tr><tr><tr><tr>
+		<tr>
+			<td></td>
+			<td><button onclick="studLogin()">Login</button></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td><a href="./login.html">Admin Login</a></td>
+		</tr>
+    </table> 
+</body>
+<script>
+function studLogin() {
+ 	var userid = document.getElementById("userid").value;
+	var passw = document.getElementById("passw").value;
+	if(userid == "" || passw == ""){	
+		alert("Invalid credentials");
+		return;
+	}
+	
+	return fetch(
+            'http://localhost:8080/studlogin',
+            {   method: 'GET',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw)}
+                ),
+             }
+           ).then( (response) => { 
+					if(response.status == 200){
+						return response.json();
+					}else{
+						alert("Invalid Credentials");
+					}
+			})
+			.then(function(data) {
+			if(data != undefined){
+				localStorage.setItem('userid', userid);
+				localStorage.setItem('password', passw);
+				localStorage.setItem('user', JSON.stringify(data));
+				window.location.replace("./StudentHome.html");
+			}
+			})
+            .catch(err => 
+			{
+				console.log(err);
+			}
+			)
+}
+</script>
+</html>

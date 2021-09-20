@@ -1,0 +1,115 @@
+<html>
+<head>
+	<title>Student List</title>
+</head>
+<body onload="getAllStudents()">
+<center>
+	<table id="myTable" style="width:50%; text-align:center; margin-top:30px;" align="center" cellpadding="10px" border>
+	<h2><u>Student List</u></h2>
+	<thead>
+        <tr>
+			<th>Student Id</th> 		
+            <th>Name</th> 
+            <th>Surname</th>
+			<th>User Id</th>
+			<th>Course Ids</th>
+			<th>Operations</th>
+        </tr>
+	</thead>
+	<tbody id="tBody">
+
+	</tbody>
+    </table> 
+	<br><br>
+<button onclick="callAddStudent()">Add Student</button>
+<button onclick="back()">Home</button>
+<button onclick="logout()">Logout</button>
+</center>
+</body>
+<script>
+var userid = localStorage.getItem("userid");
+var passw = localStorage.getItem("password");
+
+function back(){
+	window.location.replace("./AdminHome.html");
+}
+
+function callUpdateStudentPage(id){
+	window.location.replace("./UpdateStudent.html?id="+id);
+}
+
+function deleteStudent(id){
+	var r = confirm("Are you sure you want to delete student wiht id: "+ id);
+	if (r == true) {		
+		return fetch(
+            'http://localhost:8080/student/delete/'+id,
+            {   method: 'GET',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw)}
+                ),
+             }
+           ).then( (response) => { return response;})
+			.then(function(data) {
+				if(data.status == 200){
+					window.location.reload();
+				}else{
+					alert("Invalid request");
+				}
+			})
+            .catch(err => console.log(err))		
+	} else {
+
+	}
+}
+
+function callAddStudent(){	
+	window.location.replace("./AddStudent.html");
+}
+
+function logout(){
+	localStorage.clear();
+	window.location.replace("./login.html");
+}
+
+function getAllStudents() {
+	return fetch(
+            'http://localhost:8080/student/getall/',
+            {   method: 'GET',
+                headers: new Headers(
+                   {'authorization': 'Basic ' + window.btoa(userid + ":" + passw),
+				    "Content-Type": "application/json",
+                    "Accept":"application/json"}
+                ),
+             }
+           ).then( (response) => { 
+					if(response.status == 200){
+						return response.json();
+					}else{
+						alert("You are not logged in");
+						window.location.replace("./login.html");
+					}
+			})
+			.then(function(data) {
+				var table = document.getElementById("myTable").getElementsByTagName('tbody')[0];				
+				for(var i=0;i<data.length;i++){
+					var row = table.insertRow(i);
+					var cell1 = row.insertCell(0);
+					var cell2 = row.insertCell(1);
+					var cell3 = row.insertCell(2);
+					var cell4 = row.insertCell(3);
+					var cell5 = row.insertCell(4);
+					var cellLast = row.insertCell(5);
+					cell1.innerHTML = data[i].studentId;
+					cell2.innerHTML = data[i].name;
+					cell3.innerHTML = data[i].surname;
+					cell4.innerHTML = data[i].userid;
+					cell5.innerHTML = data[i].courseIdsString;
+					cellLast.innerHTML = "<button onclick='callUpdateStudentPage(" + data[i].studentId + ")'>Update</button>" + " " + 
+					"<button onclick='deleteStudent(" + data[i].studentId + ")'>Delete</button>";
+				}
+				
+			})
+            .catch(err => console.log(err))
+}
+</script>
+</html>
